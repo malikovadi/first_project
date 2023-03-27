@@ -1,14 +1,35 @@
 #include <iostream>
 #include <bits/stdc++.h>
 using namespace std;
+int button;
 struct sold {
     string name;
     int quantity;
     string date;
 };
-
-int main() {
-    string Deliveryman[] = {
+void inputCheck(int& a, int b, int c){
+    while (!(cin >> a) || a < b || a > c) {
+        cin.clear(); // clear the error flags
+        cin.ignore(numeric_limits<std::streamsize>::max(), '\n'); // ignore the rest of the input
+        if(b == 0 and c == 0){
+            cout << "Для выхода в главное меню введите 0:>>";
+        }
+        else {
+            cout << "Произошла ошибка. Введите число от " << b << " до " << c << endl;
+        }
+    }
+}
+void showMenuSales(){
+    cout << "Пожалуйста наберите номер меню для работы с программой, если закончили, то наберите 7:" << endl;
+    cout <<"1.Показать весь список материалов для продажи" << endl;
+    cout <<"2.Искать материал" << endl;
+    cout << "3.Показать отчет по продаже" << endl << "4.Выполнить продажу оборудований" << endl;
+    cout << "5.Сделать заказ отсутствующего товара" << endl << "6.Удалить заказ" << endl << "7.Выход" << endl;
+    cout << "8.Промышленное производство" << endl;
+    cout << "Выбор меню:>>";
+}
+void showMenuDelivery(){
+    string Deliveryman [] = {
         "1.Показать список материалов для доставки",
         "2.Показать доставленные заказы",
         "3.Доставить заказ",
@@ -18,7 +39,12 @@ int main() {
         "7.Выход",
         "8.Инструкции"
     };
-    string Provider[] = {
+    for(auto now: Deliveryman){
+        cout << now << endl;
+    }
+}
+void showMenuProvider(){
+    string Provider [] = {
         "1.Показать список товаров для поставки",
         "2.Показать количество поставляемого материала",
         "3.Показать материал с самым большим количеством заказов для доставки",
@@ -26,769 +52,449 @@ int main() {
         "5.Выход",
         "6.Инструкции"
     };
-    string username, password, nameSearch, dateSearch;
-    int accountType, menuNumber, subMenuNumber, button;
-start: cout << "Для запуска программы, пожалуйста введите тип аккаунта:>>";
-    cout << endl << "1. Delivery man" << endl << "2. Salesman" << endl << "3. Provider" << endl;
-    //Вводится тип аккаунта
-    while (!(cin >> accountType) || accountType < 1 || accountType > 3) {
-        cin.clear(); // clear the error flags
-        cin.ignore(numeric_limits<std::streamsize>::max(), '\n'); // ignore the rest of the input
-        cout << "Произошла ошибка. Введите число от 1 до 3" << endl;
+    for(auto now: Provider){
+        cout << now << endl;
     }
-    if (accountType == 1 or accountType == 2 or accountType == 3) {
-        if (accountType == 1) {
-            cout << "Вы выбрали тип аккаунта: доставщик." << endl;
-        }
-        else if (accountType == 2) {
-            cout << "Вы выбрали тип аккаунта: продавец." << endl;
-        }
-        else if (accountType == 3) {
-            cout << "Вы выбрали тип аккаунта: поставщик." << endl;
-        }
-        //Вводится логин и пароль для авторизации
-        cout << "Пожалуйста, введите ваш логин и пароль:>>" << endl;
-    sign: cout << "Логин:>>";
-        cin >> username;
+}
+void goToMenu(){
+    cout << endl << "0 - К главному меню" << endl;
+    inputCheck(button, 0, 0);
+}
+void signInAndCheck(int c){
+    string a, b;
+    while(true){
+        cout << "Логин:>>";
+        cin >> a;
         cout << "Пароль:>>";
-        cin >> password;
-
-        //Меню для аккаунта продавца
-        if (username == "s" and password == "s123" and accountType == 2) {
-            cout << "Приветствую, дорогой Продавец!" << endl;
-            cout << "Пожалуйста наберите номер меню для работы с программой, если закончили, то наберите 7:" << endl;
-        menu: cout << "1.Показать весь список материалов для продажи" << endl;
-            cout << "2.Искать материал" << endl;
-            cout << "3.Показать отчет по продаже" << endl << "4.Выполнить продажу оборудований" << endl;
-            cout << "5.Сделать заказ отсутствующего товара" << endl << "6.Удалить заказ" << endl << "7.Выход" << endl;
-            cout << "8.Промышленное производство" << endl;
-            cout << "Выбор меню:>>";
-            while (!(cin >> menuNumber) || menuNumber < 1 || menuNumber > 8) {
-                cin.clear(); // clear the error flags
-                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ignore the rest of the input
-                cout << "Произошла ошибка. Введите число от 1 до 8" << endl;
-                goto menu;
+        cin >> b;
+        if(a == "d" and b == "d123" and c == 1 or a == "s" and b == "s123" and c == 2 or a == "p" and b == "p123" and c == 3){
+            break;
+        }
+        else {
+            cout << "Неверный логин или пароль. Попробуйте заново:" << endl;
+        }
+    }
+}
+void showFileContent(const string& filename, string d){
+    string sales;
+    ifstream ReadFile(filename);
+    if(ReadFile.peek() == std::ifstream::traits_type::eof()){
+        cout << d << endl;
+    }
+    else{
+        while(getline (ReadFile, sales)){
+            cout << sales << endl;
+        }
+    }
+    ReadFile.close();
+}
+void searchFromFile(const string& filename){
+    int subMenuNumber;
+    string nameSearch, dateSearch;
+    while(true){
+        cout << "Выберите: каким способом хотите искать:" << endl << "1.По названию" << endl << "2.По дате" << endl;
+        inputCheck(subMenuNumber, 1, 2);
+        int q = 0;
+        if(subMenuNumber == 1){
+            cout << "Напишите название материала для поиска:>>";
+            cin >> nameSearch;
+            cout << "Результаты поиска:" << endl;
+            ifstream ReadFile(filename);
+            if (ReadFile.peek() == std::ifstream::traits_type::eof()) {
+                cout << "Нет товаров для продажи." << endl;
+                break;
             }
-            if (menuNumber == 1) {
-                string sales;
-                ifstream ReadFile("sales.txt");
-                if (ReadFile.peek() == std::ifstream::traits_type::eof()) {
-                    cout << "Нет товаров для продажи." << endl;
-                }
-                else {
-                    while (getline(ReadFile, sales)) {
-                        cout << sales << endl;
-                    }
-                }
-                ReadFile.close();
-
-                cout << "0 - К главному меню" << endl;
-                while (!(cin >> button) || button != 0) {
-                    cin.clear(); // clear the error flags
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ignore the rest of the input
-                    cout << "Произошла ошибка. Введите число 0, чтобы выйти в главное меню." << endl;
-                }
-                if (button == 0) {
-                    goto menu;
-                }
-            }
-            else if (menuNumber == 2) {
-                cout << "Выберите: каким способом хотите искать:" << endl << "1.По названию" << endl << "2.По дате" << endl;
-                while (!(cin >> subMenuNumber) || subMenuNumber > 2 or subMenuNumber < 1) {
-                    cin.clear(); // clear the error flags
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ignore the rest of the input
-                    cout << "Произошла ошибка. Введите число 1 или 2, чтобы выбрать метод поиска." << endl;
-                }
-                int q = 0;
-                if (subMenuNumber == 1) {
-                    cout << "Напишите название материала для поиска:>>";
-                search: cin >> nameSearch;
-                    cout << "Результаты поиска:" << endl;
-                    ifstream ReadFile("sales.txt");
-                    if (ReadFile.peek() == std::ifstream::traits_type::eof()) {
-                        cout << "Нет товаров для продажи." << endl;
-                    }
-                    else {
-                        string line;
-                        while (getline(ReadFile, line)) {
-                            if (line.find(nameSearch) != string::npos) {
-                                q++;
-                                cout << line << endl;
-                            }
-                        }
-
-                        // Переход к главному меню
-                        if (q != 0) {
-                            cout << endl << "0 - К главному меню" << endl;
-                            while (!(cin >> button) || button != 0) {
-                                cin.clear(); // clear the error flags
-                                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ignore the rest of the input
-                                cout << "Произошла ошибка. Введите число 0, чтобы выйти в главное меню." << endl;
-                            }
-                            if (button == 0) {
-                                goto menu;
-                            }
-                        }
-                        else if (q == 0) {
-                            cout << "Не удалось найти товар с таким названием..." << endl;
-                            cout << "Попробуйте ввести заново:>>";
-                            goto search;
-                        }
-                    }
-                    cout << endl << "0 - К главному меню" << endl;
-                    while (!(cin >> button) || button != 0) {
-                        cin.clear(); // clear the error flags
-                        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ignore the rest of the input
-                        cout << "Произошла ошибка. Введите число 0, чтобы выйти в главное меню." << endl;
-                    }
-                    if (button == 0) {
-                        goto menu;
-                    }
-                    ReadFile.close();
-                }
-                else if (subMenuNumber == 2) {
-                    q = 0;
-                    cout << "Напишите дату для поиска:>>";
-                datesearch: cin >> dateSearch;
-                    cout << "Результаты поиска:" << endl;
-                    string line;
-                    ifstream ReadFile("sales.txt");
-                    if (ReadFile.peek() == std::ifstream::traits_type::eof()) {
-                        cout << "Нет товаров для продажи." << endl;
-                    }
-                    else {
-                        while (getline(ReadFile, line)) {
-                            if (line.find(dateSearch) != string::npos) {
-                                q++;
-                                cout << line << endl;
-                            }
-                        }
-
-                        // Переход к главному меню
-                        if (q != 0) {
-                            cout << endl << "0 - К главному меню" << endl;
-                            while (!(cin >> button) || button != 0) {
-                                cin.clear(); // clear the error flags
-                                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ignore the rest of the input
-                                cout << "Произошла ошибка. Введите число 0, чтобы выйти в главное меню." << endl;
-                            }
-                            if (button == 0) {
-                                goto menu;
-                            }
-                        }
-                        else if (q == 0) {
-                            cout << "Не удалось найти товар с такой датой..." << endl;
-                            cout << "Попробуйте ввести заново:>>";
-                            goto datesearch;
-                        }
-                    }
-                    cout << endl << "0 - К главному меню" << endl;
-                    while (!(cin >> button) || button != 0) {
-                        cin.clear(); // clear the error flags
-                        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ignore the rest of the input
-                        cout << "Произошла ошибка. Введите число 0, чтобы выйти в главное меню." << endl;
-                    }
-                    if (button == 0) {
-                        goto menu;
-                    }
-                    ReadFile.close();
-                }
-            }
-            else if (menuNumber == 3) {
+            else {
                 string line;
-                ifstream ReadFile("sold.txt");
-                if (ReadFile.peek() == std::ifstream::traits_type::eof()) {
-                    cout << "Нет проданных товаров." << endl;
-                }
-                else {
-                    while (getline(ReadFile, line)) {
+                while (getline(ReadFile, line)) {
+                    if (line.find(nameSearch) != string::npos) {
+                        q++;
                         cout << line << endl;
                     }
                 }
-                ReadFile.close();
-                cout << endl << "0 - Назад" << endl;
-                while (!(cin >> button) || button != 0) {
-                    cin.clear(); // clear the error flags
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ignore the rest of the input
-                    cout << "Произошла ошибка. Введите число 0, чтобы выйти в главное меню." << endl;
-                }
-                if (button == 0) {
-                    goto menu;
-                }
-            }
-            else if (menuNumber == 4) {
-                string sales;
-                ifstream ReadFile("sales.txt");
-                if (ReadFile.peek() == std::ifstream::traits_type::eof()) {
-                    cout << "Нет товаров для продажи." << endl;
-                }
-                else {
-                    while (getline(ReadFile, sales)) {
-                        cout << sales << endl;
-                    }
-                    cout << "Пожалуйста напишите название материала, который вы бы хотели продать:>>";
-                    string elementToMove;
-                    cin >> elementToMove;
-                    // Перемещение материала из sales.txt в sold.txt
-                    string lineSell;
-                    string lineSold;
-                    bool elementFound = false;
-                    ifstream sale("sales.txt");
-                    ofstream saletemp("saletemp.txt");
-                    ifstream sold("sold.txt");
-                    ofstream soldtemp("soldtemp.txt");
-                    while (getline(sold, lineSold)) {
-                        soldtemp << lineSold << endl;
-                    }
-                    while (getline(sale, lineSell)) {
-                        if (lineSell.find(elementToMove) != string::npos) {
-                            elementFound = true;
-                            soldtemp << lineSell << endl;
-                        }
-                        else {
-                            saletemp << lineSell << endl;
-                        }
-                    }
-                    sale.close();
-                    saletemp.close();
-                    sold.close();
-                    soldtemp.close();
-                    remove("sales.txt");
-                    rename("saletemp.txt", "sales.txt");
-                    remove("sold.txt");
-                    rename("soldtemp.txt", "sold.txt");
-                    if (elementFound) {
-                        cout << "Ваш запрос принят." << endl;
-                    }
-                    else {
-                        cout << "Запас данного материала закончился, пожалуйста сделайте заказ на поставку!" << endl;
-                    }
-                }
-                ReadFile.close();
-                cout << endl << "0 - К главному меню" << endl;
-                while (!(cin >> button) || button != 0) {
-                    cin.clear(); // clear the error flags
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ignore the rest of the input
-                    cout << "Произошла ошибка. Введите число 0, чтобы выйти в главное меню." << endl;
-                }
-                if (button == 0) {
-                    goto menu;
-                }
-            }
-            else if (menuNumber == 5) {
-                string output;
-                ifstream ReadFilenomaterials("nomaterials.txt");
-                // Check if the file is empty
-                if (ReadFilenomaterials.peek() == ifstream::traits_type::eof()) {
-                    cout << "Нет отсутсвующих товаров." << endl;
-                }
-                else {
-                    while (getline(ReadFilenomaterials, output)) {
-                        cout << output << endl;
-                    }
-                    cout << "Введите название и количество товара:>>";
-                    string noMaterial;
-                    cin >> noMaterial;
-                    int NumberOfNoMaterial;
-                    while (!(cin >> NumberOfNoMaterial)) {
-                        cin.clear(); // clear the error flags
-                        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ignore the rest of the input
-                        cout << "Произошла ошибка. Введите число, сколько вы бы хотели заказать." << endl;
-                    }
-
-                    string noMat;
-                    string needMat;
-                    ifstream ReadFilenoMat("nomaterials.txt");
-                    ofstream ReadFilenoMattemp("nomaterialtemp.txt");
-                    ifstream file("need_materials.txt");
-                    ofstream filetemp("need_materialstemp.txt");
-                    while (getline(file, needMat)) {
-                        filetemp << needMat << endl;
-                    }
-                    while (getline(ReadFilenoMat, noMat)) {
-                        if (noMat.find(noMaterial) != string::npos) {
-                            filetemp << noMat << " " << NumberOfNoMaterial << endl;
-                        }
-                        else {
-                            ReadFilenoMattemp << noMat << endl;
-                        }
-                    }
-                    ReadFilenoMat.close();
-                    ReadFilenoMattemp.close();
-                    file.close();
-                    filetemp.close();
-                    remove("nomaterials.txt");
-                    rename("nomaterialtemp.txt", "nomaterials.txt");
-                    remove("need_materials");
-                    rename("need_materialstemp.txt", "need_materials.txt");
-                    cout << "Ваш запрос принят." << endl;
+    
+                // Переход к главному меню
+                if(q != 0) {
                     cout << endl << "0 - К главному меню" << endl;
+                    inputCheck(button, 0, 0);
+                    break;
                 }
-                while (!(cin >> button) || button != 0) {
-                    cin.clear(); // clear the error flags
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ignore the rest of the input
-                    cout << "Произошла ошибка. Введите число 0, чтобы выйти в главное меню." << endl;
-                }
-                if (button == 0) {
-                    goto menu;
-                }
-                ReadFilenomaterials.close();
-
-            }
-            else if (menuNumber == 6) {
-                string sold;
-                ifstream ReadFile("sold.txt");
-                if (ReadFile.peek() == ifstream::traits_type::eof()) {
-                    cout << "Нет проданных товаров." << endl;
-                }
-                else {
-                    while (getline(ReadFile, sold)) {
-                        cout << sold << endl;
-                    }
-                    string DeleteOrder;
-                    cout << "Напишите название товара заказа который вы бы хотели удалить?>>";
-                    cin >> DeleteOrder;
-                    string LineDel;
-                    ifstream ReadFiledelOrder("sold.txt");
-                    ofstream DeleteOrdertemp("deltempsold.txt");
-                    while (getline(ReadFiledelOrder, LineDel)) {
-                        if (LineDel.find(DeleteOrder) != string::npos) {
-                            continue;
-                        }
-                        else {
-                            DeleteOrdertemp << LineDel << endl;
-                        }
-                    }
-                    ReadFiledelOrder.close();
-                    DeleteOrdertemp.close();
-                    remove("sold.txt");
-                    rename("deltempsold.txt", "sold.txt");
-                    cout << "Ваш запрос принят." << endl;
-                }
-                ReadFile.close();
-                cout << endl << "0 - К главному меню" << endl;
-                while (!(cin >> button) || button != 0) {
-                    cin.clear(); // clear the error flags
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ignore the rest of the input
-                    cout << "Произошла ошибка. Введите число 0, чтобы выйти в главное меню." << endl;
-                }
-                if (button == 0) {
-                    goto menu;
+                else if(q == 0){
+                    cout << "Не удалось найти товар с таким названием..." << endl;
+                    cout << "Попробуйте ввести заново:>>";
                 }
             }
-            else if (menuNumber == 7) {
-                cout << "Программа завершена, мы будем рады вашему возвращению!";
-                return 0;
-            }
-            else if (menuNumber == 8) {
-                cout << "Инструкция:" << endl;
-                string instructions;
-                ifstream ReadFile("instructions.txt");
-                while (getline(ReadFile, instructions)) {
-                    cout << instructions << endl;
-                }
-                ReadFile.close();
-                cout << endl << "0 - К главному меню" << endl;
-                while (!(cin >> button) || button != 0) {
-                    cin.clear(); // clear the error flags
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ignore the rest of the input
-                    cout << "Произошла ошибка. Введите число 0, чтобы выйти в главное меню." << endl;
-                }
-                if (button == 0) {
-                    goto menu;
-                }
-            }
-            else {
-                cout << "Enter numbers from 1 to 8.";
-                goto menu;
-            }
-        }
-
-        //Меню для аккаунта доставщика
-        else if (username == "d" and password == "d123" and accountType == 1) {
-            cout << "Приветствую, дорогой Доставщик!" << endl << "Пожалуйста наберите номер меню для работы с программой, если закончили, то наберите 7:" << endl;
-        menu2: for (auto now : Deliveryman) {
-            cout << now << endl;
-        }
-        cout << "Выбор меню:>>";
-        while (!(cin >> menuNumber) || menuNumber < 1 || menuNumber > 8) {
-            cin.clear(); // clear the error flags
-            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ignore the rest of the input
-            cout << "Произошла ошибка. Введите число от 1 до 8" << endl;
-            goto menu2;
-        }
-        if (menuNumber == 1) {
-            string line;
-            ifstream ReadFile("sold.txt");
-            if (ReadFile.peek() == ifstream::traits_type::eof()) {
-                cout << "Нет проданных товаров." << endl;
-            }
-            else {
-                while (getline(ReadFile, line)) {
-                    cout << line << endl;
-                }
-            }
-            ReadFile.close();
-            cout << "0 - К главному меню" << endl;
-            while (!(cin >> button) || button != 0) {
-                cin.clear(); // clear the error flags
-                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ignore the rest of the input
-                cout << "Произошла ошибка. Введите число 0, чтобы выйти в главное меню." << endl;
-            }
-            if (button == 0) {
-                goto menu2;
-            }
-        }
-        else if (menuNumber == 2) {
-            string line;
-            ifstream ReadFile("delivered.txt");
-            if (ReadFile.peek() == ifstream::traits_type::eof()) {
-                cout << "Нет доставленнных товаров." << endl;
-            }
-            else {
-                while (getline(ReadFile, line)) {
-                    cout << line << endl;
-                }
-            }
-            ReadFile.close();
-            cout << "0 - К главному меню" << endl;
-            while (!(cin >> button) || button != 0) {
-                cin.clear(); // clear the error flags
-                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ignore the rest of the input
-                cout << "Произошла ошибка. Введите число 0, чтобы выйти в главное меню." << endl;
-            }
-            if (button == 0) {
-                goto menu2;
-            }
-        }
-        else if (menuNumber == 3) {
-            string line;
-            ifstream ReadFile("sold.txt");
-            if (ReadFile.peek() == ifstream::traits_type::eof()) {
-                cout << "Нет проданных товаров." << endl;
-            }
-            else {
-                while (getline(ReadFile, line)) {
-                    cout << line << endl;
-                }
-                cout << "Какой заказ был доставлен? Введите название оборудования:>>";
-                string ordered;
-                cin >> ordered;
-                string delivered;
-                string sold;
-                ifstream ReadSold("sold.txt");
-                ofstream WriteSoldTemp("soldtemp");
-                ifstream ReadDelivered("delivered.txt");
-                ofstream WriteDeliveredTemp("deliveredtemp");
-                while (getline(ReadDelivered, delivered)) {
-                    WriteDeliveredTemp << delivered << endl;
-                }
-                while (getline(ReadSold, sold)) {
-                    if (sold.find(ordered) != string::npos) {
-                        WriteDeliveredTemp << sold << endl;
-                    }
-                    else {
-                        WriteSoldTemp << sold << endl;
-                    }
-                }
-                ReadSold.close();
-                ReadDelivered.close();
-                WriteDeliveredTemp.close();
-                WriteSoldTemp.close();
-                remove("sold.txt");
-                remove("delivered.txt");
-                rename("soldtemp", "sold.txt");
-                rename("deliveredtemp", "delivered.txt");
-                cout << "Ваш запрос принят." << endl;
-            }
-            ReadFile.close();
             cout << endl << "0 - К главному меню" << endl;
-            while (!(cin >> button) || button != 0) {
-                cin.clear(); // clear the error flags
-                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ignore the rest of the input
-                cout << "Произошла ошибка. Введите число 0, чтобы выйти в главное меню." << endl;
+            inputCheck(button, 0, 0);
+            ReadFile.close();
+        }
+        else if(subMenuNumber == 2){
+            q = 0;
+            cout << endl << "Напишите дату для поиска:>>";
+            dateSearch: cin >> dateSearch;
+            cout << "Результаты поиска:" << endl;
+            string line;
+            ifstream ReadFile("sales.txt");
+            if(ReadFile.peek() == std::ifstream::traits_type::eof()){
+                cout << "Нет товаров для продажи." << endl;
+                break;
             }
-            if (button == 0) {
-                goto menu2;
+            else{
+                while (getline(ReadFile, line)) {
+                    if (line.find(dateSearch) != string::npos) {
+                        q++;
+                        cout << line << endl;
+                    }
+                }
+                
+                // Переход к главному меню
+                if(q != 0){
+                    cout << endl << "0 - К главному меню" << endl;
+                    inputCheck(button, 0, 0);
+                    break;
+                }
+                else if(q == 0){
+                    cout << "Не удалось найти товар с такой датой..." << endl;
+                    cout << "Попробуйте ввести заново:>>";
+                    goto dateSearch;
+                }
+            }
+            cout << endl << "0 - К главному меню" << endl;
+            inputCheck(button, 0, 0);
+            ReadFile.close();
+        }
+    }
+}
+void moveElement(const string& filename1, const string& filename2) { 
+    string sales;
+    ifstream ReadFile(filename1); 
+    if(ReadFile.peek() == std::ifstream::traits_type::eof()){
+        cout << endl;
+    }
+    else{
+        cout << "Пожалуйста напишите название материала, который вы бы хотели продать:>>"; 
+        string elementToMove; 
+        cin >> elementToMove; 
+     
+        string lineSell; 
+        string lineSold; 
+        bool elementFound = false; 
+        ifstream sale(filename1); 
+        ofstream saletemp("saletemp.txt"); 
+        ifstream sold(filename2); 
+        ofstream soldtemp("soldtemp.txt"); 
+        while (getline(sold, lineSold)) { 
+            soldtemp << lineSold << endl; 
+        } 
+        while (getline(sale, lineSell)) { 
+            if (lineSell.find(elementToMove) != string::npos) { 
+                elementFound = true; 
+                soldtemp << lineSell << endl; 
+            } else { 
+                saletemp << lineSell << endl; 
+            } 
+        } 
+        sale.close(); 
+        saletemp.close(); 
+        sold.close(); 
+        soldtemp.close(); 
+        remove(filename1.c_str()); 
+        rename("saletemp.txt", filename1.c_str()); 
+        remove(filename2.c_str()); 
+        rename("soldtemp.txt", filename2.c_str()); 
+     
+        if (elementFound) { 
+            cout << "Ваш запрос принят." << endl; 
+        } else { 
+            cout << "Запас данного материала закончился, пожалуйста сделайте заказ на поставку!" << endl; 
+        } 
+    }
+    ReadFile.close();
+    goToMenu();
+}
+int endProgram(){
+    cout << "Программа завершена, мы будем рады вашему возвращению!";
+    exit(0);
+}
+void deleteElement(const string& filename){
+    string sold;
+    ifstream ReadFile(filename);
+    if(ReadFile.peek() == std::ifstream::traits_type::eof()){
+        cout << endl;
+    }
+    else{
+        string DeleteOrder;
+        cout << "Напишите название товара заказа который вы бы хотели удалить?>>";
+        cin >> DeleteOrder;
+        string LineDel;
+        bool elementFound = false; 
+        ifstream ReadFiledelOrder(filename);
+        ofstream DeleteOrdertemp("deltempsold.txt");
+        while(getline (ReadFiledelOrder, LineDel)){
+            if(LineDel.find(DeleteOrder) != string::npos){
+                elementFound = true; 
+                continue;
+            }
+            else{
+                DeleteOrdertemp << LineDel << endl;
+            }
+        }
+        ReadFiledelOrder.close();
+        DeleteOrdertemp.close();
+        remove(filename.c_str());
+        rename("deltempsold.txt", filename.c_str());
+        if (elementFound) { 
+            cout << "Ваш запрос принят." << endl; 
+        } else { 
+            cout << "Запас данного материала закончился, пожалуйста сделайте заказ на поставку!" << endl; 
+        } 
+    }
+    ReadFile.close();
+    goToMenu();
+}
+void numberOfMaterials(const string& filename, string d, string c){
+    int count = 0;
+        string line;
+        ifstream ReadDelivered(filename);
+        if (ReadDelivered.peek() == ifstream::traits_type::eof()) {
+            cout << d << endl;
+        }
+        else {
+            while(getline(ReadDelivered, line)){
+                count++;
+            }
+            cout << "Количество " << c << " товаров: ";
+            cout << count;
+        }
+        ReadDelivered.close();
+}
+void salaryCounter(const string & filename, string d){
+    int stake = 1000;
+    string line;
+    ifstream ReadFile(filename);
+    if (ReadFile.peek() == ifstream::traits_type::eof()) {
+        cout << d << endl;
+    } else {
+        while(getline (ReadFile, line)){
+            cout << line << " - " << stake << "с" << endl;
+        }
+        int count = 0;
+        string lineCount;
+        ifstream ReadDelivered(filename);
+        while(getline(ReadDelivered, lineCount)){
+            count++;
+        }
+        cout << "Ваш заработок: " << count * stake << "сомов";
+        ReadDelivered.close();
+    }
+    ReadFile.close();
+}
+void maxMinOfMaterials(int menuNumber){
+    ifstream ReadSold("sold.txt");
+    if (ReadSold.peek() == ifstream::traits_type::eof()) {
+        cout << "Нет заказов." << endl;
+    } else {
+        vector<sold> Sold;
+        string name;
+        int quantity;
+        string date;
+    
+        while (ReadSold >> name >> quantity >> date) {
+            sold materials;
+            materials.name = name;
+            materials.quantity = quantity;
+            materials.date = date;
+            Sold.push_back(materials);
+        }
+        if (Sold.empty()) {
+            cout << "Нет никаких заказов." << endl;
+            goToMenu();
+        }
+        
+        if (menuNumber == 3) {
+            int MaterialWithMaxOrders = INT_MIN;
+            for (auto now : Sold) {
+                if (now.quantity > MaterialWithMaxOrders) {
+                    MaterialWithMaxOrders = now.quantity;
+                }
+            }
+            vector <string> MaterialsWithMaxOrders;
+            for (auto now : Sold) {
+                if (now.quantity == MaterialWithMaxOrders) {
+                    MaterialsWithMaxOrders.push_back(now.name);
+                }
+            }
+            cout << "Результаты: ";
+            for (auto now : MaterialsWithMaxOrders) {
+                cout << now << endl;
             }
         }
         else if (menuNumber == 4) {
-            int count = 0;
-            string line;
-            ifstream ReadDelivered("delivered.txt");
-            if (ReadDelivered.peek() == ifstream::traits_type::eof()) {
-                cout << "Нет доставленных товаров." << endl;
-            }
-            else {
-                while (getline(ReadDelivered, line)) {
-                    count++;
-                }
-                cout << "Количество доставленных товаров: ";
-                cout << count;
-            }
-            ReadDelivered.close();
-
-            cout << endl << "0 - К главному меню" << endl;
-            while (!(cin >> button) || button != 0) {
-                cin.clear(); // clear the error flags
-                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ignore the rest of the input
-                cout << "Произошла ошибка. Введите число 0, чтобы выйти в главное меню." << endl;
-            }
-            if (button == 0) {
-                goto menu2;
-            }
-        }
-        else if (menuNumber == 5) {
-            int count = 0;
-            string line;
-            ifstream ReadDelivered("sold.txt");
-            if (ReadDelivered.peek() == ifstream::traits_type::eof()) {
-                cout << "Нет проданных товаров." << endl;
-            }
-            else {
-                while (getline(ReadDelivered, line)) {
-                    count++;
-                }
-                cout << "Количество заказанных товаров: ";
-                cout << count;
-            }
-            ReadDelivered.close();
-            cout << endl << "0 - К главному меню" << endl;
-            while (!(cin >> button) || button != 0) {
-                cin.clear(); // clear the error flags
-                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ignore the rest of the input
-                cout << "Произошла ошибка. Введите число 0, чтобы выйти в главное меню." << endl;
-            }
-            if (button == 0) {
-                goto menu2;
-            }
-        }
-        else if (menuNumber == 6) {
-            int stake = 1000;
-            string line;
-            ifstream ReadFile("delivered.txt");
-            if (ReadFile.peek() == ifstream::traits_type::eof()) {
-                cout << "Нет доставленных товаров." << endl;
-            }
-            else {
-                while (getline(ReadFile, line)) {
-                    cout << line << "- " << stake << "с" << endl;
-                }
-                int count = 0;
-                string lineCount;
-                ifstream ReadDelivered("delivered.txt");
-                while (getline(ReadDelivered, lineCount)) {
-                    count++;
-                }
-                cout << "Ваш заработок: " << count * stake << "сомов";
-                ReadDelivered.close();
-            }
-            ReadFile.close();
-            cout << endl << "0 - К главному меню" << endl;
-            while (!(cin >> button) || button != 0) {
-                cin.clear(); // clear the error flags
-                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ignore the rest of the input
-                cout << "Произошла ошибка. Введите число 0, чтобы выйти в главное меню." << endl;
-            }
-            if (button == 0) {
-                goto menu2;
-            }
-        }
-        else if (menuNumber == 7) {
-            cout << "Программа завершена, мы будем рады вашему возвращению!";
-            return 0;
-        }
-        else if (menuNumber == 8) {
-            cout << "Инструкция:" << endl;
-            string instructions;
-            ifstream ReadFile("instructions.txt");
-            while (getline(ReadFile, instructions)) {
-                cout << instructions << endl;
-            }
-            ReadFile.close();
-            cout << endl << "0 - К главному меню" << endl;
-            while (!(cin >> button) || button != 0) {
-                cin.clear(); // clear the error flags
-                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ignore the rest of the input
-                cout << "Произошла ошибка. Введите число 0, чтобы выйти в главное меню." << endl;
-            }
-            if (button == 0) {
-                goto menu2;
-            }
-        }
-        }
-
-        //Меню для аккаунта поставщика
-        else if (username == "p" and password == "p123" and accountType == 3) {
-            cout << "Приветствую, дорогой Поставщик!" << endl << "Пожалуйста наберите номер меню для работы с программой, если закончили, то наберите 5:" << endl;
-        menu3: for (auto now : Provider) {
-            cout << now << endl;
-        }
-        cout << "Выбор меню:>>";
-        while (!(cin >> menuNumber) || menuNumber < 1 || menuNumber > 6) {
-            cin.clear(); // clear the error flags
-            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ignore the rest of the input
-            cout << "Произошла ошибка. Введите число от 1 до 6" << endl;
-            goto menu3;
-        }
-        if (menuNumber == 1) {
-            string need;
-            ifstream ReadNeed("need_materials.txt");
-            if (ReadNeed.peek() == ifstream::traits_type::eof()) {
-                cout << "Нет товаров для поставки." << endl;
-            }
-            else {
-                while (getline(ReadNeed, need)) {
-                    cout << need << endl;
+            int MaterialWithMinOrders = INT_MAX;
+            for (auto now : Sold) {
+                if (now.quantity < MaterialWithMinOrders) {
+                    MaterialWithMinOrders = now.quantity;
                 }
             }
-            cout << "0 - К главному меню" << endl;
-            while (!(cin >> button) || button != 0) {
-                cin.clear(); // clear the error flags
-                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ignore the rest of the input
-                cout << "Произошла ошибка. Введите число 0, чтобы выйти в главное меню." << endl;
-            }
-            if (button == 0) {
-                goto menu3;
-            }
-        }
-        else if (menuNumber == 2) {
-            ifstream ReadNeed("need_materials.txt");
-            if (ReadNeed.peek() == ifstream::traits_type::eof()) {
-                cout << "Нет товаров для поставки." << endl;
-            }
-            else {
-                int count = 0;
-                string lineNeed;
-                while (getline(ReadNeed, lineNeed)) {
-                    count++;
-                }
-                cout << "Количество поставляемого товара: ";
-                cout << count;
-            }
-            ReadNeed.close();
-            cout << endl << "0 - К главному меню" << endl;
-            while (!(cin >> button) || button != 0) {
-                cin.clear(); // clear the error flags
-                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ignore the rest of the input
-                cout << "Произошла ошибка. Введите число 0, чтобы выйти в главное меню." << endl;
-            }
-            if (button == 0) {
-                goto menu3;
-            }
-        }
-        else if (menuNumber == 3 or menuNumber == 4) {
-            ifstream ReadSold("sold.txt");
-            if (ReadSold.peek() == ifstream::traits_type::eof()) {
-                cout << "Нет заказов." << endl;
-            }
-            else {
-                vector<sold> Sold;
-                string name;
-                int quantity;
-                string date;
-
-                while (ReadSold >> name >> quantity >> date) {
-                    sold materials;
-                    materials.name = name;
-                    materials.quantity = quantity;
-                    materials.date = date;
-                    Sold.push_back(materials);
-                }
-                if (Sold.empty()) {
-                    cout << "Нет никаких заказов." << endl;
-                    cout << "0 - К главному меню" << endl;
-                    while (!(cin >> button) || button != 0) {
-                        cin.clear(); // clear the error flags
-                        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ignore the rest of the input
-                        cout << "Произошла ошибка. Введите число 0, чтобы выйти в главное меню." << endl;
-                    }
-                    if (button == 0) {
-                        goto menu3;
-                    }
-                }
-
-                if (menuNumber == 3) {
-                    int MaterialWithMaxOrders = INT_MIN;
-                    for (auto now : Sold) {
-                        if (now.quantity > MaterialWithMaxOrders) {
-                            MaterialWithMaxOrders = now.quantity;
-                        }
-                    }
-                    vector <string> MaterialsWithMaxOrders;
-                    for (auto now : Sold) {
-                        if (now.quantity == MaterialWithMaxOrders) {
-                            MaterialsWithMaxOrders.push_back(now.name);
-                        }
-                    }
-                    cout << "Результаты: ";
-                    for (auto now : MaterialsWithMaxOrders) {
-                        cout << now << endl;
-                    }
-                }
-                else if (menuNumber == 4) {
-                    int MaterialWithMinOrders = INT_MAX;
-                    for (auto now : Sold) {
-                        if (now.quantity < MaterialWithMinOrders) {
-                            MaterialWithMinOrders = now.quantity;
-                        }
-                    }
-                    vector <string> MaterialsWithMinOrders;
-                    for (auto now : Sold) {
-                        if (now.quantity == MaterialWithMinOrders) {
-                            MaterialsWithMinOrders.push_back(now.name);
-                        }
-                    }
-                    cout << "Результаты:  ";
-                    for (auto now : MaterialsWithMinOrders) {
-                        cout << now << endl;
-                    }
+            vector <string> MaterialsWithMinOrders;
+            for (auto now : Sold) {
+                if (now.quantity == MaterialWithMinOrders) {
+                    MaterialsWithMinOrders.push_back(now.name);
                 }
             }
-            ReadSold.close();
-            cout << endl << "0 - К главному меню" << endl;
-            while (!(cin >> button) || button != 0) {
-                cin.clear(); // clear the error flags
-                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ignore the rest of the input
-                cout << "Произошла ошибка. Введите число 0, чтобы выйти в главное меню." << endl;
+            cout << "Результаты:  ";
+            for (auto now : MaterialsWithMinOrders) {
+                cout << now << endl;
             }
-            if (button == 0) {
-                goto menu3;
-            }
-        }
-        else if (menuNumber == 5) {
-            cout << "Программа завершена, мы будем рады вашему возвращению!";
-            return 0;
-        }
-        else if (menuNumber == 6) {
-            cout << "Инструкция:" << endl;
-            string instructions;
-            ifstream ReadFile("instructions.txt");
-            while (getline(ReadFile, instructions)) {
-                cout << instructions << endl;
-            }
-            ReadFile.close();
-            cout << "0 - К главному меню" << endl;
-            while (!(cin >> button) || button != 0) {
-                cin.clear(); // clear the error flags
-                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ignore the rest of the input
-                cout << "Произошла ошибка. Введите число 0, чтобы выйти в главное меню." << endl;
-            }
-            if (button == 0) {
-                goto menu3;
-            }
-        }
-        }
-        // В случае, если пароль или логин введены неверно
-        else {
-            cout << "Неверный пароль или логин." << endl << "Попробуйте ввести заново:>>" << endl;
-            goto sign;
         }
     }
-    // Если введен неправильный тип аккаунта
-    else {
-        cout << "Извините, но мы не нашли такой тип аккаунта, пожалуйста повторите." << endl;
-        goto  start;
+    ReadSold.close();
+    goToMenu();
+}
+void showInstructions(){
+    cout << "Инструкция:" << endl;
+    showFileContent("instructions.txt", " ");
+    goToMenu();
+}
+int main(){
+    int accountType, menuNumber;
+    cout << "Для запуска программы, пожалуйста введите тип аккаунта:>>";
+    cout << endl << "1. Delivery man" << endl << "2. Salesman" << endl << "3. Provider" << endl;
+    //Вводится тип аккаунта
+    inputCheck(accountType, 1, 3);
+    const int saleMan = 2, deliveryMan = 1, providerMan = 3;
+    if(accountType == deliveryMan or accountType == saleMan or accountType == providerMan){
+        if(accountType == deliveryMan){
+            cout << "Вы выбрали тип аккаунта: доставщик." << endl;
+        }
+        else if(accountType == saleMan){
+            cout << "Вы выбрали тип аккаунта: продавец." << endl;
+        }
+        else if(accountType == providerMan){
+            cout << "Вы выбрали тип аккаунта: поставщик." << endl;
+        }
+        
+        cout << "Пожалуйста, введите ваш логин и пароль:>>" << endl;
+        signInAndCheck(accountType);
+        //Меню для аккаунта продавца
+        if(accountType == saleMan){
+            cout <<"Приветствую, дорогой Продавец!" << endl;
+            while(true){
+                showMenuSales();
+                inputCheck(menuNumber, 1, 8);
+                switch(menuNumber) { 
+                    case 1: 
+                        showFileContent("sales.txt", "Нет товаров для продажи."); 
+                        goToMenu(); 
+                        break; 
+                    case 2: 
+                        searchFromFile("sales.txt"); 
+                        break; 
+                    case 3: 
+                        showFileContent("sold.txt", "Нет проданных товаров."); 
+                        goToMenu(); 
+                        break; 
+                    case 4: 
+                        showFileContent("sales.txt", "Нет товаров для продажи."); 
+                        moveElement("sales.txt", "sold.txt"); 
+                        break; 
+                    case 5: 
+                        showFileContent("nomaterials.txt", "Нет отсутствующих товаров."); 
+                        moveElement("nomaterials.txt", "need_materials.txt"); 
+                        break; 
+                    case 6: 
+                        showFileContent("sold.txt", "Нет заказов."); 
+                        deleteElement("sold.txt"); 
+                        break; 
+                    case 7: 
+                        endProgram(); 
+                        break; 
+                    case 8: 
+                        showInstructions(); 
+                        break; 
+                    default: 
+                        // Handle invalid menu number 
+                        break; 
+                }
+            }
+        }
+        
+        //Меню для аккаунта доставщика
+        else if(accountType == deliveryMan){
+            cout << "Приветствую, дорогой Доставщик!" << endl << "Пожалуйста наберите номер меню для работы с программой, если закончили, то наберите 7:" << endl;
+            while(true){
+                showMenuDelivery();
+                cout << "Выбор меню:>>";
+                inputCheck(menuNumber, 1, 8);
+                switch(menuNumber) { 
+                    case 1: 
+                        showFileContent("sold.txt", "Нет проданных товаров."); 
+                        goToMenu(); 
+                        break; 
+                    case 2: 
+                        showFileContent("delivered.txt", "Нет доставленных товаров."); 
+                        goToMenu(); 
+                        break; 
+                    case 3: 
+                        showFileContent("sold.txt", "Нет проданных товаров."); 
+                        moveElement("sold.txt", "delivered.txt"); 
+                        break; 
+                    case 4: 
+                        numberOfMaterials("delivered.txt", "Нет доставленных товаров.", "доставленнных"); 
+                        goToMenu(); 
+                        break; 
+                    case 5: 
+                        numberOfMaterials("sold.txt", "Нет проданных товаров.", "проданных"); 
+                        goToMenu(); 
+                        break; 
+                    case 6: 
+                        salaryCounter("delivered.txt", "У вас нет доставленных товаров."); 
+                        goToMenu(); 
+                        break; 
+                    case 7: 
+                        endProgram(); 
+                        break; 
+                    case 8: 
+                        showInstructions(); 
+                        break; 
+                    default: 
+                        break; 
+                }
+            }
+        }
+        
+        //Меню для аккаунта поставщика
+        else if(accountType == providerMan){
+            cout << "Приветствую, дорогой Поставщик!" << endl << "Пожалуйста наберите номер меню для работы с программой, если закончили, то наберите 5:" << endl;
+            while(true){
+                showMenuProvider();
+                cout << "Выбор меню:>>";
+                inputCheck(menuNumber, 1, 6);
+                switch(menuNumber) { 
+                    case 1: 
+                        showFileContent("need_materials.txt", "Нет товаров для поставки."); 
+                        goToMenu(); 
+                        break; 
+                    case 2: 
+                        numberOfMaterials("need_materials.txt", "Нет товаров для поставки.", "поставляемого"); 
+                        goToMenu(); 
+                        break; 
+                    case 3: 
+                    case 4: 
+                        maxMinOfMaterials(menuNumber); 
+                        break; 
+                    case 5: 
+                        endProgram(); 
+                        break; 
+                    case 6: 
+                        showInstructions(); 
+                        break; 
+                    default: 
+                        break; 
+                }
+            }
+        }
+        
     }
     return 0;
 }
